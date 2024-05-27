@@ -47,49 +47,56 @@
   </head>
   <body>
     <div class="content">
-      <form action="/login" method="POST" class="mt-4">
-        <label for="Name" class="block mb-1">Name:</label>
+      <form action="/auth/signup" method="POST" class="mt-4">
+        <label for="name" class="block mb-1">Name:</label>
         <input
           type="text"
-          id="Name"
-          name="Name"
+          id="name"
+          name="name"
           class="w-full p-2 border border-gray-300 rounded mb-2 input-field"
         />
 
-        <label for="Surname" class="block mb-1">Surname:</label>
+        <label for="surname" class="block mb-1">Surname:</label>
         <input
           type="text"
-          id="Surname"
-          name="Surname"
+          id="surname"
+          name="surname"
           class="w-full p-2 border border-gray-300 rounded mb-4 input-field"
         />
-        <label for="Mail" class="block mb-1">E-mail:</label>
+        <label for="email" class="block mb-1">E-mail:</label>
         <input
-          type="text"
-          id="Mail"
-          name="Mail"
+          type="email"
+          id="email"
+          name="email"
           class="w-full p-2 border border-gray-300 rounded mb-4 input-field"
         />
-        <label for="Password" class="block mb-1">Password:</label>
+        <label for="password" class="block mb-1">Password:</label>
         <input
-          type="Password"
-          id="Password"
-          name="Password"
+          type="password"
+          id="password"
+          name="password"
           class="w-full p-2 border border-gray-300 rounded mb-4 input-field"
         />
 
-        <label for="Password" class="block mb-1">Rewrite your password:</label>
+        <label for="confirm_password" class="block mb-1"
+          >Rewrite your password:</label
+        >
         <input
-          type="Password"
-          id="Password"
-          name="Password"
+          type="password"
+          id="confirm_password"
+          name="confirm_password"
           class="w-full p-2 border border-gray-300 rounded mb-4 input-field"
         />
-        <button
+        <input
+          type="submit"
+          value="Sign Up"
+          class="button-bg hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg w-full"
+        />
+        <!-- <button
           class="button-bg hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg w-full"
         >
           SIGN UP
-        </button>
+        </button> -->
       </form>
     </div>
   </body>
