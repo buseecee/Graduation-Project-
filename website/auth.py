@@ -103,12 +103,17 @@ def signup():
         return f"An error occurred: {e}"
     finally:
         conn.close()
-    
-    return redirect(url_for('auth.login'))
 
-@auth.route('/dashboard')
-def dashboard():
-    if 'user_id' in session:
-        return '<h1>Welcome to your dashboard!</h1>'
-    else:
-        return redirect(url_for('auth.login'))
+    # INSERT işlemi için yeni bir cursor oluşturuyoruz
+    insert_cursor = conn.cursor()
+    
+    # INSERT sorgusunu çalıştırıyoruz
+    insert_cursor.execute("INSERT INTO teacher (name, surname, email, password, confirm_password) VALUES (?, ?, ?, ?, ?)", (name, surname, email, password, confirm_password))
+    
+    # İşlemi tamamla ve bağlantıyı kapat
+    conn.commit()
+    conn.close()
+    
+    return 'Sign up successful!'
+
+
