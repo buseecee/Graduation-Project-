@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -44,28 +43,59 @@
       .button-active {
         background-color: #3e00b3;
       }
+      .error-message {
+        color: red;
+        font-size: 12px;
+      }
+      .input-error {
+        border-color: red !important;
+      }
     </style>
   </head>
   <body>
     <div class="content">
       <h1 class="text-3xl mb-4 text-center">Welcome!</h1>
 
-      <form action="/login" method="POST" class="mt-4">
-        <label for="username" class="block mb-1">Username:</label>
+      <form action="{{ url_for('auth.login') }}" method="POST" class="mt-4">
+        <label for="username" class="block mb-1">E-mail:</label>
         <input
           type="text"
           id="username"
           name="username"
-          class="w-full p-2 border border-gray-300 rounded mb-2 input-field"
+          class="w-full p-2 border border-gray-300 rounded mb-2 input-field {% if invalid_email or invalid_password %} input-error {% endif %}"
+          placeholder="name@aydin.edu.tr"
+          required
         />
 
-        <label for="password" class="block mb-1">Password:</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          class="w-full p-2 border border-gray-300 rounded mb-4 input-field"
-        />
+        <label for="password" class="block mb-1">Password: </label>
+        <div class="w-full relative">
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="w-full p-2 border border-gray-300 rounded mb-4 input-field {% if invalid_email or invalid_password %} input-error {% endif %}"
+            placeholder="••••••••"
+            required
+          />
+          <button type="button" class="absolute right-3 top-3 w-4 h-4">
+            <img
+              src="{{ url_for('static', filename='images/hide_password.png') }}"
+              alt="Toggle Password Visibility"
+              onclick="togglePasswordVisibility()"
+              class="password-toggle"
+            />
+          </button>
+
+          {% if invalid_email or invalid_password %}
+          <div class="error-message">Invalid e-mail address or password</div>
+          {% endif %}
+        </div>
+        <a
+          href="/forgot-password"
+          class="block text-blue-500 mb-3 text-right"
+          style="color: #190087"
+          >Forgot Password?</a
+        >
         <button
           class="button-bg hover:bg-blue-600 w-full text-white font-bold py-3 px-6 rounded-lg"
         >
@@ -73,12 +103,45 @@
         </button>
       </form>
 
-      <a
-        href="/forgot-password"
-        class="block text-blue-500 mt-2 text-center"
-        style="color: #190087"
-        >Forgot Password?</a
-      >
+      <div class="flex items-center justify-center pt-5">
+        <p class="mr-1">Don't you have account?</p>
+
+        <a
+          href="{{ url_for('auth.signup') }}"
+          class="text-blue-500 text-center ml-1"
+          style="color: #190087"
+        >
+          Create account</a
+        >
+      </div>
     </div>
+
+    <script>
+      document.getElementById("username").addEventListener("blur", function () {
+        var emailInput = this.value;
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        var errorMessage = document.getElementById("email-error");
+
+        if (!emailRegex.test(emailInput)) {
+          errorMessage.style.display = "block";
+        } else {
+          errorMessage.style.display = "none";
+        }
+      });
+
+      function togglePasswordVisibility() {
+        var passwordInput = document.getElementById("password");
+        var passwordToggle = document.querySelector(".password-toggle");
+        if (passwordInput.type === "password") {
+          passwordInput.type = "text";
+          passwordToggle.src =
+            "{{ url_for('static', filename='images/show_password.png') }}"; // Change to show password icon
+        } else {
+          passwordInput.type = "password";
+          passwordToggle.src =
+            "{{ url_for('static', filename='images/hide_password.png') }}"; // Change back to hide password icon
+        }
+      }
+    </script>
   </body>
 </html>
