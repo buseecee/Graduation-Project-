@@ -22,4 +22,5 @@ def authorized_login():
 def teacher_login():
     return render_template('teacher_login.html')
 
+
 # Diğer görünüm fonksiyonları buraya eklenebilir
