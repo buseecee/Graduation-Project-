@@ -62,7 +62,7 @@ def signup():
     surname = request.form['surname']
     email = request.form['email']
     password = request.form['password']
-    confirm_password = request.form['confirm_password']
+    confirmPassword = request.form['confirmPassword']
 
     # Şifre validasyonu
     if not email.endswith('@aydin.edu.tr'):
@@ -74,7 +74,7 @@ def signup():
         flash(password_error)
         return redirect(url_for('auth.signup_page'))
     
-    if password != confirm_password:
+    if password != confirmPassword:
         flash('Passwords do not match.')
         return redirect(url_for('auth.signup_page'))
 
