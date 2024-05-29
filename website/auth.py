@@ -65,12 +65,18 @@ def signup():
     confirm_password = request.form['confirm_password']
 
     # Şifre validasyonu
+    if not email.endswith('@aydin.edu.tr'):
+        flash('Invalid email domain. Only @aydin.edu.tr emails are allowed.')
+        return redirect(url_for('auth.signup_page'))
+
     password_error = validate_password(password)
     if password_error:
-        return password_error
+        flash(password_error)
+        return redirect(url_for('auth.signup_page'))
     
     if password != confirm_password:
-        return "Passwords do not match."
+        flash('Passwords do not match.')
+        return redirect(url_for('auth.signup_page'))
 
     conn = get_db_connection()
     try:
