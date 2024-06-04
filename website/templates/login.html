@@ -57,11 +57,11 @@
       <h1 class="text-3xl mb-4 text-center">Welcome!</h1>
 
       <form action="{{ url_for('auth.login') }}" method="POST" class="mt-4">
-        <label for="username" class="block mb-1">E-mail:</label>
+        <label for="email" class="block mb-1">E-mail:</label>
         <input
           type="text"
-          id="username"
-          name="username"
+          id="email"
+          name="email"
           class="w-full p-2 border border-gray-300 rounded mb-2 input-field {% if invalid_email or invalid_password %} input-error {% endif %}"
           placeholder="name@aydin.edu.tr"
           required
@@ -102,22 +102,10 @@
           LOGIN
         </button>
       </form>
-
-      <div class="flex items-center justify-center pt-5">
-        <p class="mr-1">Don't you have account?</p>
-
-        <a
-          href="{{ url_for('auth.signup') }}"
-          class="text-blue-500 text-center ml-1"
-          style="color: #190087"
-        >
-          Create account</a
-        >
-      </div>
     </div>
 
     <script>
-      document.getElementById("username").addEventListener("blur", function () {
+      document.getElementById("email").addEventListener("blur", function () {
         var emailInput = this.value;
         var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         var errorMessage = document.getElementById("email-error");
