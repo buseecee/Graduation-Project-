@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Authorized Login</title>
+    <title>Teacher Login</title>
     <link
       href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
       rel="stylesheet"
@@ -57,27 +57,42 @@
       <div
         class="flex justify-center items-center h-full w-full bg-white shadow-lg rounded-lg p-6 my-6 ml-6 md:mb-0"
       >
-        <div class="w-full">
+        <!-- <div class="w-full">
           <div class="flex justify-around font-bold text-lg mb-4">
             <span>Student Name</span>
+            <span>Student Surname</span>
             <span>Student ID</span>
-            <span>Attendance Status</span>
-          </div>
-          <div id="student-list" class="flex flex-col gap-4">
-            <div class="flex justify-around items-center">
-              {% for student in students %}
-              <span>{{ student['name'] }}</span>
-              <span>{{ student['surname'] }}</span>
-              {% endfor %}
-              <button
-                class="bg-green-500 text-white font-bold py-2 px-4 rounded-lg w-32"
-                onclick="toggleAttendance(this)"
-              >
-                Present
-              </button>
-            </div>
+          </div> -->
+
+          <table class="min-w-full bg-white border border-gray-300">
+            <thead>
+                <tr>
+                    <th class="py-2 px-4 border-b">ID</th>
+                    <th class="py-2 px-4 border-b">Name</th>
+                    <th class="py-2 px-4 border-b">Surname</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td class="py-2 px-4 border-b">{{ student.id }}</td>
+                    <td class="py-2 px-4 border-b">{{ student.student_name }}</td>
+                    <td class="py-2 px-4 border-b">{{ student.student_surname }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+     
+          <!-- <div id="student-list" class="flex flex-col gap-4">
+            <button
+              class="bg-green-500 text-white font-bold py-2 px-4 rounded-lg w-32"
+              onclick="toggleAttendance(this)"
+            >
+              Present
+            </button>
+
             <hr class="my-2" />
-          </div>
+          </div> -->
 
           <!-- </div> -->
           <!-- <img

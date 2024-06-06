@@ -51,24 +51,46 @@
         font-size: 0.875rem;
         margin-top: 0.25rem;
       }
+      #userAlreadyExistError {
+        color: red;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        background-color: #ffcccc;
+        padding: 0.5rem;
+        border-radius: 5px;
+        margin-bottom: 10px; /* Added for spacing */
+      }
     </style>
   </head>
   <body>
     <div class="content">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %} {% if category ==
+      'error' %} {% if 'user already exists' in message.lower() %}
+      <div id="userAlreadyExistError">{{ message }}</div>
+      {% endif %} {% endif %} {% endfor %} {% endif %} {% endwith %}
       <form id="signupForm" action="/auth/signup" method="POST" class="mt-4">
-        <label for="name" class="block mb-2">Name:</label>
+        <label for="teacher_name" class="block mb-2">Name:</label>
         <input
           type="text"
-          id="name"
-          name="name"
+          id="teacher_name"
+          name="teacher_name"
           class="w-full p-2 border border-gray-300 rounded mb-2 input-field"
         />
 
-        <label for="surname" class="block mb-2">Surname:</label>
+        <label for="teacher_surname" class="block mb-2">Surname:</label>
         <input
           type="text"
-          id="surname"
-          name="surname"
+          id="teacher_surname"
+          name="teacher_surname"
+          class="w-full p-2 border border-gray-300 rounded mb-4 input-field"
+        />
+
+        <label for="teacher_id" class="block mb-2">Tecaher ID:</label>
+        <input
+          type="text"
+          id="teacher_id"
+          name="teacher_id"
           class="w-full p-2 border border-gray-300 rounded mb-4 input-field"
         />
 
@@ -149,6 +171,9 @@
           var confirmPasswordError = document.getElementById(
             "confirmPasswordError"
           );
+          var userAlreadyExistError = document.getElementById(
+            "userAlreadyExistError"
+          );
           var isValid = true;
           var errorMessages = [];
 
@@ -159,14 +184,15 @@
           emailError.textContent = "";
           passwordError.textContent = "";
           confirmPasswordError.textContent = "";
+          userAlreadyExistError.textContent = "";
 
           // Validate email domain
-          if (!email.value.endsWith("@aydin.edu.tr")) {
+          /* if (!email.value.endsWith("@aydin.edu.tr")) {
             isValid = false;
             emailError.textContent =
               "Invalid email domain. Only @aydin.edu.tr emails are allowed.";
             email.classList.add("invalid");
-          }
+          } */
 
           // Validate password
           if (

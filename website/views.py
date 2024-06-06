@@ -22,5 +22,9 @@ def authorized_login():
 def teacher_login():
     return render_template('teacher_login.html')
 
+@views.route('/add_course')
+def add_course():
+    return render_template('add_course.html')
+
 
 # Diğer görünüm fonksiyonları buraya eklenebilir

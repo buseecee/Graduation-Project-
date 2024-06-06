@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Authorized Login</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link
       href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
       rel="stylesheet"
@@ -30,11 +31,6 @@
         background-color: #3e00b3;
       }
     </style>
-    <script>
-      function changeButtonColor(button) {
-        button.classList.toggle("button-active");
-      }
-    </script>
   </head>
   <body class="bg-gray-100 flex flex-col h-screen">
     <div
@@ -57,21 +53,30 @@
       <div
         class="flex flex-col justify-center h-full bg-white md:w-1/4 w-1/3 shadow-lg rounded-lg px-6 my-6 mx-6 md:mb-0 gap-6"
       >
+        <form action="{{ url_for('views.signup') }}" method="get">
+          <button
+            class="button-bg hover:bg-blue-600 w-full text-white font-bold py-3 px-6 rounded-lg"
+          >
+            Add Teacher
+          </button>
+        </form>
         <button
           class="button-bg text-white font-bold py-3 px-6 rounded-lg"
           onclick="changeButtonColor(this)"
         >
           Add/Remove Student
         </button>
-        <button
+        <!-- <button
           class="button-bg hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg"
         >
           Add/Remove Teacher
-        </button>
+        </button> -->
         <button
           class="button-bg hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg"
+          onclick="loadContent('/add_course') "
+          id="changeContentButton"
         >
-          Add/Remove Class
+          Add/Remove Course
         </button>
         <button
           class="button-bg hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg"
@@ -83,20 +88,62 @@
         >
           Attendances
         </button>
-        <button
+        <!-- <button
           class="button-bg hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg"
         >
           Bulk Data Transfer
-        </button>
+        </button> -->
       </div>
       <div
+        id="content"
         class="flex justify-center items-center h-full w-full bg-white shadow-lg rounded-lg p-6 my-6 mr-6 md:mb-0"
       >
-        <img
+        <div
+          id="content"
+          class="flex justify-center items-center h-full w-full bg-white shadow-lg rounded-lg p-6 my-6 mr-6 md:mb-0"
+        >
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %} {% for category, message in messages %}
+          <div
+            class="alert alert-{{ category }} flex items-center justify-between"
+          >
+            <span>{{ message }}</span>
+            <button
+              type="button"
+              onclick="this.parentElement.style.display='none';"
+              class="ml-4 text-lg"
+            >
+              &times;
+            </button>
+          </div>
+          {% endfor %} {% endif %} {% endwith %}
+        </div>
+        <!-- <img
           src="{{ url_for('static', filename='images/logo.png') }}"
           class="w-1/2"
-        />
+        /> -->
       </div>
     </div>
+
+    <script>
+      function changeButtonColor(button) {
+        button.classList.toggle("button-active");
+      }
+
+      /* function loadAddCoursePage() {
+        fetch("/add_course")
+          .then((response) => response.text())
+          .then((data) => {
+            document.getElementById("loadContent").innerHTML = data;
+          })
+          .catch((error) => console.error("Error:", error));
+      } */
+
+      function loadContent(url) {
+        $.get(url, function (data) {
+          $("#content").html(data);
+        });
+      }
+    </script>
   </body>
 </html>

@@ -17,8 +17,7 @@ def get_db_connection():
 
 @auth.route('/login', methods=['POST'])
 def login():
-    invalid_email = False
-    invalid_password = False
+  
     email = request.form['email']
     password = request.form['password']
     
@@ -34,8 +33,75 @@ def login():
     else:
         # Giriş başarısızsa hata mesajıyla birlikte login sayfasına yönlendir
         return render_template('login.html', invalid_login=True, invalid_email=True, invalid_password=True)
+    
 
-    """ @auth.route('/teacher_login')
+@auth.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        teacher_id=request.form['teacher_id']
+        teacher_name = request.form['teacher_name']
+        teacher_surname = request.form['teacher_surname']
+        email = request.form['email']
+        password = request.form['password']
+        
+        # Veritabanına ekleme
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Kullanıcının zaten var olup olmadığını kontrol et
+        cursor.execute("SELECT * FROM teachers WHERE email=%s", (email,))
+        existing_teacher = cursor.fetchone()
+        
+        if existing_teacher:
+            flash('User already exists!', 'error')
+            cursor.close()
+            conn.close()
+            return redirect(url_for('views.signup'))
+        
+        cursor.execute("INSERT INTO teachers (teacher_id,teacher_name,teacher_surname,email, password) VALUES (%s,%s,%s,%s, %s)", (teacher_id,teacher_name,teacher_surname,email, password))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        flash('User successfully registered!', 'success')
+        return redirect(url_for('views.login'))
+    
+    return render_template('signup.html')
+
+@auth.route('/add_course', methods=['POST'])
+def add_course():
+    if request.method == 'POST':
+        course_id = request.form['course_id']
+        course_name = request.form['course_name']
+        course_day = request.form['course_day']
+        lesson_start_time= request.form['lesson_start_time']
+        lesson_end_time= request.form['lesson_end_time']
+        class_name = request.form['class_name']
+        
+        # Veritabanına ekleme
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Kursun zaten var olup olmadığını kontrol et
+        cursor.execute("SELECT * FROM courses WHERE course_id=%s", (course_id,))
+        existing_course = cursor.fetchone()
+        
+        if existing_course:
+            flash('Course already exists!', 'error')
+            cursor.close()
+            conn.close()
+            return redirect(url_for('auth.add_course'))
+        
+        cursor.execute("INSERT INTO courses (course_id, course_name, course_day, lesson_start_time, lesson_end_time, class_name) VALUES (%s, %s, %s, %s, %s, %s)", (course_id, course_name, course_day, lesson_start_time, lesson_end_time, class_name))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        flash('Course successfully added!', 'success')
+        return render_template('authorized_login.html')
+    
+
+""" @auth.route('/teacher_login')
 def get_students_info():
     conn = get_db_connection()
     cursor = conn.cursor()

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add/Remove Course</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <style>
+        .button-bg {
+        background: #190087;
+      }
+      .button-bg:hover {
+        background-color: #150073;
+      }
+      .button-active {
+        background-color: #3e00b3;
+      }
+      #alert-success {
+        color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+      }
+      #alert-error {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+      }
+    </style>
+  </head>
+  <body class="  ">
+        <div
+          class="flex flex-col justify-stretch  h-full w-full   my-6 md:mb-0 gap-6"
+        >
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} flex items-center justify-between">
+                        <span>{{ message }}</span>
+                        <button type="button" onclick="this.parentElement.style.display='none';" class="ml-4 text-lg">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <!-- <div id="alert-success" class="p-4 mb-5 rounded hidden" role="alert"></div>
+      <div id="alert-error" class="p-4 mb-5 rounded hidden" role="alert"></div> -->
+        <form id="signupForm" action="{{ url_for('auth.add_course') }}" method="POST" class="mt-4">
+            <label for="course_id" class="block mb-2">Course ID:</label>
+            <input
+              type="text"
+              id="course_id"
+              name="course_id"
+              class="w-full p-2 border border-gray-300 rounded mb-2 input-field"
+            />
+    
+            <label for="course_name" class="block mb-2">Course Name:</label>
+            <input
+              type="text"
+              id="course_name"
+              name="course_name"
+              class="w-full p-2 border border-gray-300 rounded mb-4 input-field"
+            />
+    
+            <label for="course_day" class="block mb-2">Course Day:</label>
+            <input
+              type="text"
+              id="course_day"
+              name="course_day"
+              class="w-full p-2 border border-gray-300 rounded mb-4 input-field"
+              placeholder="Enter a value between 1-7"
+            />
+
+            <label for="lesson_start_time" class="block mb-2">Course Start Time:</label>
+            <input
+              type="time"
+              id="lesson_start_time"
+              name="lesson_start_time"
+              class="w-full p-2 border border-gray-300 rounded mb-4 input-field"
+            />
+
+            <label for="lesson_end_time" class="block mb-2">Course Finish Time:</label>
+            <input
+              type="time"
+              id="lesson_end_time"
+              name="lesson_end_time"
+              class="w-full p-2 border border-gray-300 rounded mb-4 input-field"
+            />
+            
+            <label for="class_name" class="block mb-2">Class Name:</label>
+            <input
+              type="text"
+              id="class_name"
+              name="class_name"
+              class="w-full p-2 border border-gray-300 rounded mb-4 input-field"
+              placeholder="Enter the code of the classroom where the lesson will be held (e.g., T213)"
+            />
+
+            <button
+            id="changeContentButton"
+          class="button-bg  text-white font-bold py-3 px-6 mt-4 rounded-lg"
+        >
+          Add Course
+        </button>
+
+        <script>
+          
+
+        document.getElementById("addCourseForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        var formData = new FormData(this);
+
+        fetch("{{ url_for('auth.add_course') }}", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            var successAlert = document.getElementById("alert-success");
+            var errorAlert = document.getElementById("alert-error");
+            
+            if (data.status === 'success') {
+                successAlert.classList.remove('hidden');
+                successAlert.innerHTML = `<div class="flex"><svg class="w-6 h-6 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-10.293a1 1 0 00-1.414-1.414L9 9.586 7.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span>${data.message}</span><button type="button" class="ml-auto close-alert" onclick="this.parentElement.classList.add('hidden');">X</button></div>`;
+                errorAlert.classList.add('hidden');
+            } else {
+                errorAlert.classList.remove('hidden');
+                errorAlert.innerHTML = `<div class="flex"><svg class="w-6 h-6 text-red-600 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10c0 4.418-3.582 8-8 8s-8-3.582-8-8 3.582-8 8-8 8 3.582 8 8zm-8 3a1 1 0 110 2 1 1 0 010-2zm1-8a1 1 0 10-2 0v5a1 1 0 102 0V5z" clip-rule="evenodd"></path></svg><span>${data.message}</span><button type="button" class="ml-auto close-alert" onclick="this.parentElement.classList.add('hidden');">X</button></div>`;
+                successAlert.classList.add('hidden');
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+        });
+      });
+        </script>
+  </body>
+</html>
