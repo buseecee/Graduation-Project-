@@ -1,5 +1,5 @@
 import mysql.connector
-from flask import Blueprint, request, redirect, url_for, render_template, session, flash
+from flask import Blueprint, request, redirect, url_for, render_template,jsonify, session, flash
 import re
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -17,7 +17,7 @@ def get_db_connection():
 
 @auth.route('/login', methods=['POST'])
 def login():
-  
+   
     email = request.form['email']
     password = request.form['password']
     
@@ -87,29 +87,29 @@ def add_course():
         existing_course = cursor.fetchone()
         
         if existing_course:
-            flash('Course already exists!', 'error')
             cursor.close()
             conn.close()
-            return redirect(url_for('auth.add_course'))
-        
+            return jsonify({'success': False, 'message': 'Course already exists!'})
+    
         cursor.execute("INSERT INTO courses (course_id, course_name, course_day, lesson_start_time, lesson_end_time, class_name) VALUES (%s, %s, %s, %s, %s, %s)", (course_id, course_name, course_day, lesson_start_time, lesson_end_time, class_name))
         conn.commit()
         cursor.close()
         conn.close()
-        
-        flash('Course successfully added!', 'success')
-        return render_template('authorized_login.html')
+    
+    return jsonify({'success': True, 'message': 'Course successfully added!'})
     
 
-""" @auth.route('/teacher_login')
+@auth.route('/teacher_login')
 def get_students_info():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT name, surname FROM students_info")
+    cursor.execute("SELECT student_name FROM students")
     students = cursor.fetchall()
+    for i in students:
+        print(i.student_name)
     cursor.close()
     conn.close()
-    return render_template('teacher_login.html', students=students) """
+    return render_template('teacher_login.html', students=students) 
 
     """ @auth.route('/login', methods=['GET', 'POST'])
 def login():
