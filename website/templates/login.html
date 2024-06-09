@@ -21,7 +21,6 @@
             justify-content: center;
             align-items: center;
         }
-
         .content {
             background-color: white;
             padding: 20px; /* İçeriği kenarlardan ayırır */
@@ -29,111 +28,75 @@
             max-width: 400px; /* Maksimum genişlik */
             width: 90%; /* Genişliği yüzde olarak ayarlar */
         }
-
         .input-field {
             width: 100%;
         }
-
         .button-bg {
             background: #190087;
         }
-
         .button-bg:hover {
             background-color: #150073;
         }
-
         .button-active {
             background-color: #3e00b3;
         }
-
         .error-message {
             color: red;
             font-size: 12px;
+            margin-top: 4px;
         }
-
         .input-error {
-            border-color: red !important;
+            border-color: red;
         }
     </style>
 </head>
 <body>
-<div class="content">
-    <h1 class="text-3xl mb-4 text-center">Welcome!</h1>
+    <div class="content">
+        <h1 class="text-3xl mb-4 text-center">Welcome!</h1>
 
-    <form action="{{ url_for('auth.login') }}" method="POST" class="mt-4">
-        <label for="teacheremail" class="block mb-1">E-mail:</label>
-        <input
-                type="text"
-                id="teacheremail"
-                name="teacheremail"
-                class="w-full p-2 border border-gray-300 rounded mb-2 input-field {% if invalid_email or invalid_password %} input-error {% endif %}"
-                placeholder="name@aydin.edu.tr"
-                required
-        />
-
-        <label for="teacherpassword" class="block mb-1">Password: </label>
-        <div class="w-full relative">
+        <form action="/auth/login" method="POST" class="mt-4">
+            <label for="username" class="block mb-1">E-mail:</label>
             <input
-                    type="teacherpassword"
-                    id="teacherpassword"
-                    name="teacherpassword"
-                    class="w-full p-2 border border-gray-300 rounded mb-4 input-field {% if invalid_email or invalid_password %} input-error {% endif %}"
-                    placeholder="••••••••"
-                    required
+                type="text"
+                id="username"
+                name="username"
+                class="w-full p-2 border border-gray-300 rounded mb-2 input-field {% if invalid_email %} input-error {% endif %}"
+                required
             />
-            <button type="button" class="absolute right-3 top-3 w-4 h-4">
-                <img
-                        src="{{ url_for('static', filename='images/hide_password.png') }}"
-                        alt="Toggle Password Visibility"
-                        onclick="togglePasswordVisibility()"
-                        class="password-toggle"
-                />
-            </button>
-
-            {% if invalid_email or invalid_password %}
-            <div class="error-message">Invalid e-mail address or password</div>
+            {% if invalid_email %}
+                <div class="error-message">Geçersiz mail adresi</div>
             {% endif %}
-        </div>
-        <a
-                href="/forgot-password"
-                class="block text-blue-500 mb-3 text-right"
-                style="color: #190087"
-        >Forgot Password?</a>
-        <button
-                class="button-bg hover:bg-blue-600 w-full text-white font-bold py-3 px-6 rounded-lg"
-        >
-            LOGIN
-        </button>
-    </form>
+            <label for="password" class="block mb-1">Password:</label>
+            <input
+                type="password"
+                id="password"
+                name="password"
+                class="w-full p-2 border border-gray-300 rounded mb-4 input-field"
+                required
+            />
 
-</div>
+            <button class="button-bg hover:bg-blue-600 w-full text-white font-bold py-3 px-6 rounded-lg">
+                LOGIN
+            </button>
+        </form>
 
-<script>
-    document.getElementById("teacheremail").addEventListener("blur", function () {
-        var emailInput = this.value;
-        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        var errorMessage = document.getElementById("email-error");
+        <a href="/forgot-password" class="block text-blue-500 mt-2 text-center" style="color: #190087">
+            Forgot Password?
+        </a>
+    </div>
 
-        if (!emailRegex.test(emailInput)) {
-            errorMessage.style.display = "block";
-        } else {
-            errorMessage.style.display = "none";
-        }
-    });
+    <script>
+        document.getElementById("username").addEventListener("blur", function () {
+            var emailInput = this.value;
+            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            var errorMessage = document.getElementById("email-error");
 
-    function togglePasswordVisibility() {
-        var passwordInput = document.getElementById("teacherpassword");
-        var passwordToggle = document.querySelector(".password-toggle");
-        if (passwordInput.type === "teacherpassword") {
-            passwordInput.type = "text";
-            passwordToggle.src =
-                    "{{ url_for('static', filename='images/show_password.png') }}"; // Change to show password icon
-        } else {
-            passwordInput.type = "password";
-            passwordToggle.src =
-                    "{{ url_for('static', filename='images/hide_password.png') }}"; // Change back to hide password icon
-        }
-    }
-</script>
+            if (!emailRegex.test(emailInput)) {
+                errorMessage.style.display = "block";
+            } else {
+                errorMessage.style.display = "none";
+            }
+        });
+    </script>
 </body>
 </html>
