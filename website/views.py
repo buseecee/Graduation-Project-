@@ -26,5 +26,15 @@ def teacher_login():
 def add_course():
     return render_template('add_course.html')
 
+@views.route('/add_student')
+def add_student():
+    return render_template('add_student.html')
 
+@views.route('/add_teacher')
+def add_teacher():
+    return render_template('add_teacher.html')
+
+@views.route('/change_password')
+def change_password():
+    return render_template('change_password.html')
 # Diğer görünüm fonksiyonları buraya eklenebilir

@@ -3,37 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sign Up Page</title>
+    <title>Add Teacher</title>
     <link
       href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
       rel="stylesheet"
     />
     <style>
-      body {
-        background: linear-gradient(
-          to bottom left,
-          #6356c7,
-          #6b00d7,
-          #3e00b3,
-          #190087,
-          #150073
-        );
-        margin: 0;
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      .content {
-        background-color: white;
-        padding: 20px;
-        border-radius: 10px;
-        max-width: 400px;
-        width: 90%;
-      }
-      .input-field {
-        width: 100%;
-      }
       .button-bg {
         background: #190087;
       }
@@ -43,18 +18,59 @@
       .button-active {
         background-color: #3e00b3;
       }
-      .invalid {
-        border-color: red;
+      .modal {
+        display: none; /* Gizli olacak */
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
+        padding-top: 60px;
       }
-      .error-message {
+      .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        border: 1px solid #888;
+        width: 30%;
+        border-radius: 20px;
+      }
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        position: relative;
+        top: -2px;
+        right: 5px;
+      }
+      .close:hover,
+      .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .message-success {
+        color: green;
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        padding: 10px;
+        border-radius: 5px;
+      }
+      .message-error {
         color: red;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
+        background-color: #ffcccc;
+        border-color: #f5c6cb;
+        padding: 10px;
+        border-radius: 5px;
       }
     </style>
   </head>
-  <body>
-    <div class="content">
+  <body class="">
+    <div class="flex flex-col justify-stretch h-full w-full my-6 md:mb-0 gap-6">
       <form id="signupForm" action="/auth/signup" method="POST" class="mt-4">
         <label for="teacher_id" class="block mb-2">Teacher ID:</label>
         <input
@@ -125,7 +141,7 @@
             <img
               src="{{ url_for('static', filename='images/hide_password.png') }}"
               alt="Toggle Password Visibility"
-              onclick="togglePasswordVisibility()"
+              onclick="toggleConfirmPasswordVisibility()"
               class="password-toggle"
             />
           </button>
@@ -139,14 +155,67 @@
         <div class="error-message">{{ message }}</div>
         {% endif %} {% endfor %} {% endif %} {% endwith %}
 
-        <input
-          type="submit"
-          value="Sign Up"
-          class="button-bg hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg w-full mt-4"
-        />
+        <button
+          id="changeContentButton"
+          class="button-bg text-white font-bold py-3 px-6 mt-4 rounded-lg"
+        >
+          Add Student
+        </button>
       </form>
+      <div id="myModal" class="modal">
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <p id="modal-message"></p>
+        </div>
+      </div>
     </div>
     <script>
+      document
+        .getElementById("add_teacher_form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault(); // Sayfanın yeniden yüklenmesini engelle
+          var form = event.target;
+          var formData = new FormData(form);
+
+          fetch(form.action, {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              var modal = document.getElementById("myModal");
+              var modalMessage = document.getElementById("modal-message");
+              if (data.success) {
+                modalMessage.textContent = data.message;
+                modalMessage.className = "message-success";
+              } else {
+                modalMessage.textContent = data.message;
+                modalMessage.className = "message-error";
+              }
+              modal.style.display = "block";
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              var modal = document.getElementById("myModal");
+              var modalMessage = document.getElementById("modal-message");
+              modalMessage.textContent = "An unexpected error occurred.";
+              modal.style.display = "block";
+            });
+        });
+
+      // Modal kapatma işlevi
+      document.getElementsByClassName("close")[0].onclick = function () {
+        var modal = document.getElementById("myModal");
+        modal.style.display = "none";
+      };
+
+      window.onclick = function (event) {
+        var modal = document.getElementById("myModal");
+        if (event.target == modal) {
+          modal.style.display = "none";
+        }
+      };
+
       document
         .getElementById("signupForm")
         .addEventListener("submit", function (event) {
@@ -210,6 +279,34 @@
             passwordError.textContent = errorMessages.join(" ");
           }
         });
+
+      function togglePasswordVisibility() {
+        var passwordInput = document.getElementById("password");
+        var passwordToggle = document.querySelector(".password-toggle");
+        if (passwordInput.type === "password") {
+          passwordInput.type = "text";
+          passwordToggle.src =
+            "{{ url_for('static', filename='images/show_password.png') }}"; // Change to show password icon
+        } else {
+          passwordInput.type = "password";
+          passwordToggle.src =
+            "{{ url_for('static', filename='images/hide_password.png') }}"; // Change back to hide password icon
+        }
+      }
+
+      function toggleConfirmPasswordVisibility() {
+        var passwordInput = document.getElementById("confirm_password");
+        var passwordToggle = document.querySelector(".password-toggle");
+        if (passwordInput.type === "password") {
+          passwordInput.type = "text";
+          passwordToggle.src =
+            "{{ url_for('static', filename='images/show_password.png') }}"; // Change to show password icon
+        } else {
+          passwordInput.type = "password";
+          passwordToggle.src =
+            "{{ url_for('static', filename='images/hide_password.png') }}"; // Change back to hide password icon
+        }
+      }
     </script>
   </body>
 </html>

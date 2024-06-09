@@ -4,37 +4,65 @@ import re
 from werkzeug.security import generate_password_hash, check_password_hash
 
 auth = Blueprint('auth', __name__)
+# Orijinal şifreyi hashleme
+hashed_password = generate_password_hash("00Be1414.")
+
+# Veritabanına eklerken bu hashed_password'ü kullanmalısınız.
+print(hashed_password)
 
 def get_db_connection():
     conn = mysql.connector.connect(
         host='localhost',  # MySQL sunucunuzun adresi
         user='buse',  # MySQL kullanıcı adı
         password='123456.',  # MySQL şifresi
-        database='classcheck'  # Kullanmak istediğiniz veritabanı
+        database='classcheck' # Kullanmak istediğiniz veritabanı
     )
     return conn
 
-
-@auth.route('/login', methods=['POST'])
-def login():
-   
-    email = request.form['email']
-    password = request.form['password']
-    
-    # Veritabanından e-posta ve şifre kontrolü
-    conn=get_db_connection()
+def user_exists(email):
+    conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM teachers WHERE email=%s AND password=%s", (email, password))
-    teacher = cursor.fetchone()
+    cursor.execute("SELECT * FROM teachers WHERE email=%s", (email,))
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return user
 
-    if teacher:
-        # Giriş başarılıysa ana sayfaya yönlendir
-        return redirect(url_for('views.teacher_login'))
-    else:
-        # Giriş başarısızsa hata mesajıyla birlikte login sayfasına yönlendir
-        return render_template('login.html', invalid_login=True, invalid_email=True, invalid_password=True)
+@auth.route('/login', methods=['GET', 'POST'])
+def login():
+    invalid_email = False
+    invalid_password = False
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM teachers WHERE email=%s", (email,))
+        user = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if user:
+            if check_password_hash(user[4], password):
+                session['user_id'] = user[0]
+                return redirect(url_for('views.teacher_login'))
+            else:
+                invalid_password = True
+        else:
+            invalid_email = True
+
+        return render_template('login.html', invalid_email=invalid_email, invalid_password=invalid_password)
+
+    return render_template('login.html', invalid_email=True, invalid_password=True)
+
+@auth.route('/logout')
+def logout():
+    # Kullanıcı oturumunu sonlandır
+    session.pop('user_id', None)
+    session.pop('user_email', None)
+    return redirect(url_for('views.login'))
     
-
 @auth.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -43,30 +71,47 @@ def signup():
         teacher_surname = request.form['teacher_surname']
         email = request.form['email']
         password = request.form['password']
-        
-        # Veritabanına ekleme
+        confirmPassword = request.form['confirm_password']
+
+        # Şifre validasyonu
+        password_error = validate_password(password)
+        if password_error:
+            flash(password_error, 'error')
+            return redirect(url_for('auth.signup'))
+
+        if password != confirmPassword:
+            flash('Passwords do not match.', 'error')
+            return redirect(url_for('auth.signup'))
+
         conn = get_db_connection()
         cursor = conn.cursor()
 
         # Kullanıcının zaten var olup olmadığını kontrol et
         cursor.execute("SELECT * FROM teachers WHERE email=%s", (email,))
         existing_teacher = cursor.fetchone()
-        
+
         if existing_teacher:
             flash('User already exists!', 'error')
             cursor.close()
             conn.close()
             return redirect(url_for('views.signup'))
-        
-        cursor.execute("INSERT INTO teachers (teacher_id,teacher_name,teacher_surname,email, password) VALUES (%s,%s,%s,%s, %s)", (teacher_id,teacher_name,teacher_surname,email, password))
+
+        hashed_password = generate_password_hash(password)
+
+        cursor.execute("INSERT INTO teachers (teacher_id, teacher_name, teacher_surname, email, password) VALUES (%s, %s, %s, %s, %s)", 
+                       (teacher_id, teacher_name, teacher_surname, email, hashed_password))
         conn.commit()
         cursor.close()
         conn.close()
-        
+
         flash('User successfully registered!', 'success')
         return redirect(url_for('views.login'))
-    
+
     return render_template('signup.html')
+
+       
+        
+        
 
 @auth.route('/add_course', methods=['POST'])
 def add_course():
@@ -77,6 +122,10 @@ def add_course():
         lesson_start_time= request.form['lesson_start_time']
         lesson_end_time= request.form['lesson_end_time']
         class_name = request.form['class_name']
+        
+        # Boş alan kontrolü
+        if not course_id or not course_name or not course_day or not lesson_start_time or not lesson_end_time or not class_name:
+            return jsonify({'success': False, 'message': 'All fields are required!'})
         
         # Veritabanına ekleme
         conn = get_db_connection()
@@ -97,49 +146,8 @@ def add_course():
         conn.close()
     
     return jsonify({'success': True, 'message': 'Course successfully added!'})
-    
 
-@auth.route('/teacher_login')
-def get_students_info():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT student_name FROM students")
-    students = cursor.fetchall()
-    for i in students:
-        print(i.student_name)
-    cursor.close()
-    conn.close()
-    return render_template('teacher_login.html', students=students) 
-
-    """ @auth.route('/login', methods=['GET', 'POST'])
-def login():
-    invalid_email = False
-    invalid_password = False
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM teachers WHERE email=?", (email,))
-        user = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        return render_template('login.html') """
-    """ if user:
-            if check_password_hash(user['password'], password):
-                session['user_id'] = user['id']
-                return redirect(url_for('views.teacher_login'))
-            else:
-                invalid_password = True
-        else:
-            invalid_email = True """
-
-    """ return render_template('login.html', invalid_email=invalid_email, invalid_password=invalid_password)
-
-    return render_template('login.html', invalid_email=invalid_email, invalid_password=invalid_password) """
-
-    """ def validate_password(password):
+def validate_password(password):
     if not (8 <= len(password) <= 16):
         return "Your password must be 8-16 characters, include at least one lowercase letter, one uppercase letter, and a number."
     if not re.search(r"[A-Z]", password):
@@ -148,72 +156,41 @@ def login():
         return "Your password must be 8-16 characters, include at least one lowercase letter, one uppercase letter, and a number."
     if not re.search(r"[0-9]", password):
         return "Your password must be 8-16 characters, include at least one lowercase letter, one uppercase letter, and a number."
-    return None """
+    return None 
 
-    """ @auth.route('/signup', methods=['GET', 'POST'])
-    def signup():
+
+@auth.route('/change-password', methods=['GET', 'POST'])
+def change_password():
     if request.method == 'POST':
-        # POST isteği ile gelen verileri işleme kodları
-        pass
-    else:
-        # GET isteği ile signup sayfasını render etme kodları
-        return render_template('signup.html')
-    name = request.form['name']
-    surname = request.form['surname']
-    email = request.form['email']
-    password = request.form['password']
-    confirmPassword = request.form['confirmPassword']
-
-    # Şifre validasyonu
-    if not email.endswith('@aydin.edu.tr'):
-        flash('Invalid email domain. Only @aydin.edu.tr emails are allowed.')
-        return redirect(url_for('auth.signup_page'))
-
-    password_error = validate_password(password)
-    if password_error:
-        flash(password_error)
-        return redirect(url_for('auth.signup_page'))
-    
-    if password != confirmPassword:
-        flash('Passwords do not match.')
-        return redirect(url_for('auth.signup_page'))
-
-    conn = get_db_connection()
-    try:
-        # Kullanıcı var mı kontrol et
-        select_cursor = conn.cursor()
-        select_cursor.execute("SELECT * FROM users WHERE email=?", (email,))
-        existing_record = select_cursor.fetchone()
-        select_cursor.close()
-
-        if existing_record:
-            return 'User already exists!'
+        current_password = request.form['current_password']
+        new_password = request.form['new_password']
         
-        # Yeni kullanıcı ekle
-        insert_cursor = conn.cursor()
-        hashed_password = generate_password_hash(password)
-        insert_cursor.execute(
-            "INSERT INTO users (name, surname, email, password) VALUES (%s, %s, %s, %s)",
-            (name, surname, email, hashed_password)
-        )
+        # Kullanıcının oturum bilgilerini al
+        user_id = session.get('user_id')
+        
+        if not user_id:
+            return redirect(url_for('auth.login'))
+
+        # Veritabanından mevcut şifreyi kontrol et
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT password FROM teachers WHERE id=%s", (user_id,))
+        teacher = cursor.fetchone()
+        
+        # Mevcut şifreyi kontrol et
+        if not teacher or not check_password_hash(teacher['password'], current_password):
+            conn.close()
+            error = "Current password is incorrect."
+            return render_template('change_password.html', error=error)
+        
+        # Yeni şifreyi hashle ve güncelle
+        hashed_new_password = generate_password_hash(new_password)
+        cursor.execute("UPDATE teachers SET password=%s WHERE id=%s", (hashed_new_password, user_id))
         conn.commit()
-        insert_cursor.close()
+        conn.close()
         
-    except sqlite3.Error as e:
-        return f"An error occurred: {e}"
-    finally:
-        conn.close() """
-
-    """     # INSERT işlemi için yeni bir cursor oluşturuyoruz
-    insert_cursor = conn.cursor()
+        flash('Password changed successfully!', 'success')
+        return redirect(url_for('auth.change_password'))
     
-    # INSERT sorgusunu çalıştırıyoruz
-    insert_cursor.execute("INSERT INTO teacher (name, surname, email, password, confirmPassword) VALUES (%s, %s, %s, %s, %s)", (name, surname, email, password, confirmPassword))
-    
-    # İşlemi tamamla ve bağlantıyı kapat
-    conn.commit()
-    conn.close()
-    
-    return 'Sign up successful!' """
-
+    return render_template('change_password.html')
 

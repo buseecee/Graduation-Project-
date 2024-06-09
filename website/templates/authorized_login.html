@@ -9,7 +9,6 @@
       href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
       rel="stylesheet"
     />
-
     <style>
       .custom-background {
         background: linear-gradient(
@@ -30,6 +29,19 @@
       .button-active {
         background-color: #3e00b3;
       }
+      .language-selector {
+        display: none;
+        position: absolute;
+        top: 60px;
+        right: 20px;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+      }
+      .language-selector select {
+        width: 100%;
+      }
     </style>
   </head>
   <body class="bg-gray-100 flex flex-col h-screen">
@@ -37,113 +49,85 @@
       class="flex flex-row justify-between items-center custom-background p-6"
     >
       <div class="">
-        <div class="text-white text-2xl font-bold">ClassCheck</div>
-        <div class="text-white">Authorized</div>
+        <div class="text-white text-2xl font-bold" data-key="welcome">
+          ClassCheck
+        </div>
+        <div class="text-white" data-key="description">Authorized</div>
       </div>
       <div>
-        <button class="mr-5">
+        <button id="gear-button" class="mr-5">
           <img src="{{ url_for('static', filename='images/gear.png') }}" />
         </button>
-        <button>
+        <button id="logoutButton">
           <img src="{{ url_for('static', filename='images/logout.png') }}" />
         </button>
       </div>
+    </div>
+    <div id="language-selector" class="language-selector">
+      <label for="language-select">Choose a language:</label>
+      <select id="language-select">
+        <option value="en">English</option>
+        <option value="tr">Türkçe</option>
+      </select>
     </div>
     <div class="flex flex-row">
       <div
         class="flex flex-col justify-center h-full bg-white md:w-1/4 w-1/3 shadow-lg rounded-lg px-6 my-6 mx-6 md:mb-0 gap-6"
       >
         <div id="message_div"></div>
-        <form action="{{ url_for('views.signup') }}" method="get">
-          <button
-            class="button-bg hover:bg-blue-600 w-full text-white font-bold py-3 px-6 rounded-lg"
-          >
-            Add Teacher
-          </button>
-        </form>
         <button
           class="button-bg text-white font-bold py-3 px-6 rounded-lg"
-          onclick="changeButtonColor(this)"
+          onclick="loadContent('/add_teacher')"
+          data-key="addRemoveTeacher"
+        >
+          Add Teacher
+        </button>
+        <button
+          class="button-bg text-white font-bold py-3 px-6 rounded-lg"
+          onclick="loadContent('/add_student')"
+          data-key="addRemoveStudent"
         >
           Add/Remove Student
         </button>
-        <!-- <button
-          class="button-bg hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg"
-        >
-          Add/Remove Teacher
-        </button> -->
         <button
           class="button-bg hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg"
-          onclick="loadContent('/add_course') "
-          id="changeContentButton"
+          onclick="loadContent('/add_course')"
+          data-key="addRemoveClass"
         >
           Add/Remove Course
         </button>
         <button
           class="button-bg hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg"
+          data-key="classList"
         >
           Student/Teacher Class List
         </button>
         <button
           class="button-bg hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg"
+          onclick="loadContent('/attendances')"
+          data-key="attendances"
         >
           Attendances
         </button>
-        <!-- <button
-          class="button-bg hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg"
-        >
-          Bulk Data Transfer
-        </button> -->
       </div>
 
       <div
         id="content"
         class="flex justify-center items-center h-full w-full bg-white shadow-lg rounded-lg p-6 my-6 mr-6 md:mb-0"
-      >
-        <!-- {% with messages = get_flashed_messages(with_categories=true) %} {% if
-        messages %} {% for category, message in messages %}
-        <div
-          class="alert alert-{{ category }} flex items-center justify-between"
-        >
-          <span>{{ message }}</span>
-          <button
-            type="button"
-            onclick="this.parentElement.style.display='none';"
-            class="ml-4 text-lg"
-          >
-            &times;
-          </button>
-        </div>
-        {% endfor %} {% endif %} {% endwith %} -->
-      </div>
-      <!-- <img
-          src="{{ url_for('static', filename='images/logo.png') }}"
-          class="w-1/2"
-        /> -->
+      ></div>
     </div>
-
     <script>
       function changeButtonColor(button) {
         button.classList.toggle("button-active");
       }
-
-      /* function loadAddCoursePage() {
-        fetch("/add_course")
-          .then((response) => response.text())
-          .then((data) => {
-            document.getElementById("loadContent").innerHTML = data;
-          })
-          .catch((error) => console.error("Error:", error));
-      } */
-
+      //////////////////* SAYFA İÇERİKLERİNİN ANA DİV'DE AÇILMASI İÇİN *///////////////////////////////////////
       function loadContent(url) {
         $.get(url, function (data) {
           $("#content").html(data);
         });
       }
-
       document
-        .getElementById("add_course_form")
+        .getElementById("add_teacher_form")
         .addEventListener("submit", function (event) {
           event.preventDefault(); // Sayfanın yeniden yüklenmesini engelle
           var form = event.target;
@@ -168,6 +152,64 @@
               console.error("Error:", error);
             });
         });
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      ///////////////////////////* LOGOUT   *////////////////////////////////////////////////////////
+      document
+        .getElementById("logoutButton")
+        .addEventListener("click", function () {
+          window.location.href = "{{ url_for('auth.logout') }}";
+        });
+      //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      //////////////////////////////////* DİL DEĞİŞTİRME AYARI  *//////////////////////////////////////////
+      function toggleLanguageSelector() {
+        $("#language-selector").toggle();
+      }
+
+      function changeLanguage(language) {
+        const translations = {
+          en: {
+            welcome: "Welcome",
+            description: "Authorized",
+            addRemoveStudent: "Add/Remove Student",
+            addRemoveTeacher: "Add/Remove Teacher",
+            classList: "Student/Teacher Class List",
+            addRemoveClass: "Add/Remove Class",
+            attendances: "Attendances",
+            bulkDataTransfer: "Bulk Data Transfer",
+          },
+          tr: {
+            welcome: "ClassCheck",
+            description: "Yetkili",
+            addRemoveStudent: "Öğrenci Ekle/Çıkar",
+            addRemoveTeacher: "Öğretmen Ekle/Çıkar",
+            classList: "Öğrenci/Öğretmen Sınıf Listesi",
+            addRemoveClass: "Sınıf Ekle/Çıkar",
+            attendances: "Yoklamalar",
+            bulkDataTransfer: "Toplu Veri Transferi",
+          },
+        };
+
+        $("[data-key]").each(function () {
+          const key = $(this).data("key");
+          $(this).text(translations[language][key]);
+        });
+      }
+
+      $(document).ready(function () {
+        console.log("Document is ready");
+        $("#gear-button").click(function () {
+          console.log("Gear button clicked");
+          toggleLanguageSelector();
+        });
+
+        $("#language-select").change(function () {
+          const selectedLanguage = $(this).val();
+          changeLanguage(selectedLanguage);
+        });
+      });
+      ///////////////////////////////////////////////////////////////////////////////////////////////////////
     </script>
   </body>
 </html>
